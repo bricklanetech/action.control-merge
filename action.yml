@@ -1,0 +1,21 @@
+name: Merge Permission Check
+description: Uses supplied rules to validate whether destination branches can be merged from current branch
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+inputs:
+  workflow:
+    description: list of steps within workflow provided in ascending order for merging (eg "a b c" ==> "a->b->c")
+    required: false
+    default: master
+  hotfix_pattern:
+    description: the grep pattern to use for the format of hotfix branches (ie quick-fix branches that can merge anywhere)
+    required: false
+    default: hotfix/*
+  feature_pattern:
+    description: the grep pattern to use for the format of feature branches (development branches that are yet to be added to workflow)
+    required: false
+    default: feature/*
+outputs:
+  response:
+    description: message provided for either success or failure, depending on reason for failure
