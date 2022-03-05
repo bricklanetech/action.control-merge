@@ -3,15 +3,17 @@
 A Github action to check whether a merge/PR is permitted to happen between branches based on user-supplied rules.
 
 ## How to Use
+
 1. Create a new action to trigger on (typically) a pull request,
 2. Within `jobs.<job_id>.steps` of the action workflow, add a `uses` statement similar to the following (see below for use of the `with` statement).
-   ```yml
-   - uses: konsentus/action.control-merge@master
-     with:
-       workflow: a b c master
-       feature_pattern: feature/*
-       hotfix_pattern: hotfix/*
-   ```
+
+```yml
+- uses: propertylift/action.control-merge@master
+  with:
+    workflow: a b c master
+    feature_pattern: feature/*
+    hotfix_pattern: hotfix/*
+```
 
 ## Using the `with` statement
 
