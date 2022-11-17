@@ -101,6 +101,9 @@ FEATURE_PATTERN=${INPUT_FEATURE_PATTERN}
 POSITION_SOURCE=$(indexOf ${SOURCE_BRANCH} "${WORKFLOW[@]}")
 POSITION_TARGET=$(indexOf ${TARGET_BRANCH} "${WORKFLOW[@]}")
 
+# mark repo directory as safe to prevent 'dubious ownership' detected in the repository
+git config --global --add safe.directory /github/workspace
+
 # hotfixes can be merged anywhere
 echo "-> checking if hotfix"
 if isHotfix; then
