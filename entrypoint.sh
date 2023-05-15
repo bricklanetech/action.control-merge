@@ -2,7 +2,7 @@
 
 if [ -z "${GITHUB_HEAD_REF}" ] || [ -z "${GITHUB_BASE_REF}" ]; then
     # expected env vars dont exist, cannot continue
-    echo "::set-output name=response::✘ Either GITHUB_HEAD_REF or GITHUB_BASE_REF are not defined. Cannot continue"
+    echo "response=✘ Either GITHUB_HEAD_REF or GITHUB_BASE_REF are not defined. Cannot continue" >> $GITHUB_OUTPUT
     exit 2
 fi
 
@@ -107,20 +107,20 @@ git config --global --add safe.directory /github/workspace
 # hotfixes can be merged anywhere
 echo "-> checking if hotfix"
 if isHotfix; then
-    echo "::set-output name=response::✔ ${SOURCE_BRANCH} is a hotfix branch"
+    echo "response=✔ ${SOURCE_BRANCH} is a hotfix branch" >> $GITHUB_OUTPUT
     exit 0
 fi
 
 echo "-> checking if merge is allowed in the workflow rules"
 if ! isMergeAllowedInWorkflow; then
-    echo "::set-output name=response::✘ Workflow does not allow ${SOURCE_BRANCH} to be merged into ${TARGET_BRANCH}"
+    echo "response=✘ Workflow does not allow ${SOURCE_BRANCH} to be merged into ${TARGET_BRANCH}" >> $GITHUB_OUTPUT
     exit 1
 fi
 
 echo "-> checking if branch is blocked"
 if ! isBranchBlocked; then
-    echo "::set-output name=response::✘ ${TARGET_BRANCH} is currently blocked"
+    echo "response=✘ ${TARGET_BRANCH} is currently blocked" >> $GITHUB_OUTPUT
     exit 1
 fi
 
-echo "::set-output name=response::✔ ${SOURCE_BRANCH} is allowed to merge into ${TARGET_BRANCH}"
+echo "response=✔ ${SOURCE_BRANCH} is allowed to merge into ${TARGET_BRANCH}" >> $GITHUB_OUTPUT
