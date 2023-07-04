@@ -2,7 +2,7 @@
 
 if [ -z "${GITHUB_HEAD_REF}" ] || [ -z "${GITHUB_BASE_REF}" ]; then
     # expected env vars dont exist, cannot continue
-    echo "response=✘ Either GITHUB_HEAD_REF or GITHUB_BASE_REF are not defined. Cannot continue" >> $GITHUB_OUTPUT
+    echo "response=✘ Either GITHUB_HEAD_REF or GITHUB_BASE_REF are not defined. Cannot continue" >>"${GITHUB_OUTPUT}"
     exit 2
 fi
 
@@ -11,7 +11,7 @@ fi
 indexOf() {
     local VALUE="${1}"
     shift
-    local ARRAY=($@)
+    local ARRAY=("$@")
     local POSITION=-1
 
     for i in "${!ARRAY[@]}"; do
@@ -21,18 +21,18 @@ indexOf() {
         fi
     done
 
-    echo ${POSITION}
+    echo "${POSITION}"
 }
 
 # checks if source branch is a hotfix and returns success (or failure if not)
 isHotfix() {
-    return $(echo "${SOURCE_BRANCH}" | grep -qe "${HOTFIX_PATTERN}")
+    return "$(echo "${SOURCE_BRANCH}" | grep -qe "${HOTFIX_PATTERN}")"
 }
 
 # checks if source branch is a feature and returns success (or failure if not)
 isFeature() {
     TARGET=${1:-$SOURCE_BRANCH}
-    return $(echo "${TARGET}" | grep -qe "${FEATURE_PATTERN}")
+    return "$(echo "${TARGET}" | grep -qe "${FEATURE_PATTERN}")"
 }
 
 # checks if merge is permitted via the defined workflow array
@@ -40,7 +40,7 @@ isFeature() {
 isMergeAllowedInWorkflow() {
     # features only allowed to merge into start of workflow (n=0)
     if isFeature; then
-        if [ "${POSITION_TARGET}" -eq "0" ] || isFeature $TARGET_BRANCH; then
+        if [ "${POSITION_TARGET}" -eq "0" ] || isFeature "${TARGET_BRANCH}"; then
             echo "--> source is feature branch and target either another feature or start of workflow"
             return 0
         fi
@@ -76,30 +76,29 @@ isBranchBlocked() {
     # target branch is considered blocked if its current HEAD is ahead of the next branch HEAD
     # ie the head of the 'target' branch is not an ancester of the 'after target' branch
     if git merge-base --is-ancestor \
-        $(git rev-parse origin/${TARGET_BRANCH}) \
-        $(git rev-parse origin/${AFTER_TARGET_BRANCH})
-    then
+        "$(git rev-parse origin/"${TARGET_BRANCH}")" \
+        "$(git rev-parse origin/"${AFTER_TARGET_BRANCH}")"; then
         echo "--> target branch is not blocked"
         return 0
     fi
 
     echo "--> Branch is blocked"
 
-    TARGET_BRANCH_LAST_COMMIT_HASH=$(git rev-parse origin/${TARGET_BRANCH})
-    COMMITTER=$(git show -s --format='%an' ${TARGET_BRANCH_LAST_COMMIT_HASH})
+    TARGET_BRANCH_LAST_COMMIT_HASH=$(git rev-parse origin/"${TARGET_BRANCH}")
+    COMMITTER=$(git show -s --format='%an' "${TARGET_BRANCH_LAST_COMMIT_HASH}")
 
     echo "✘ Branch ${TARGET_BRANCH} is awaiting merge into ${AFTER_TARGET_BRANCH}, please check with ${COMMITTER}"
     return 1
 }
 
-SOURCE_BRANCH=${GITHUB_HEAD_REF}
-TARGET_BRANCH=${GITHUB_BASE_REF}
-WORKFLOW=(${INPUT_WORKFLOW})
-HOTFIX_PATTERN=${INPUT_HOTFIX_PATTERN}
-FEATURE_PATTERN=${INPUT_FEATURE_PATTERN}
+SOURCE_BRANCH="${GITHUB_HEAD_REF}"
+TARGET_BRANCH="${GITHUB_BASE_REF}"
+WORKFLOW=("${INPUT_WORKFLOW}")
+HOTFIX_PATTERN="${INPUT_HOTFIX_PATTERN}"
+FEATURE_PATTERN="${INPUT_FEATURE_PATTERN}"
 
-POSITION_SOURCE=$(indexOf ${SOURCE_BRANCH} "${WORKFLOW[@]}")
-POSITION_TARGET=$(indexOf ${TARGET_BRANCH} "${WORKFLOW[@]}")
+POSITION_SOURCE=$(indexOf "${SOURCE_BRANCH}" "${WORKFLOW[@]}")
+POSITION_TARGET=$(indexOf "${TARGET_BRANCH}" "${WORKFLOW[@]}")
 
 # mark repo directory as safe to prevent 'dubious ownership' detected in the repository
 git config --global --add safe.directory /github/workspace
@@ -107,20 +106,20 @@ git config --global --add safe.directory /github/workspace
 # hotfixes can be merged anywhere
 echo "-> checking if hotfix"
 if isHotfix; then
-    echo "response=✔ ${SOURCE_BRANCH} is a hotfix branch" >> $GITHUB_OUTPUT
+    echo "response=✔ ${SOURCE_BRANCH} is a hotfix branch" >>"${GITHUB_OUTPUT}"
     exit 0
 fi
 
 echo "-> checking if merge is allowed in the workflow rules"
 if ! isMergeAllowedInWorkflow; then
-    echo "response=✘ Workflow does not allow ${SOURCE_BRANCH} to be merged into ${TARGET_BRANCH}" >> $GITHUB_OUTPUT
+    echo "response=✘ Workflow does not allow ${SOURCE_BRANCH} to be merged into ${TARGET_BRANCH}" >>"${GITHUB_OUTPUT}"
     exit 1
 fi
 
 echo "-> checking if branch is blocked"
 if ! isBranchBlocked; then
-    echo "response=✘ ${TARGET_BRANCH} is currently blocked" >> $GITHUB_OUTPUT
+    echo "response=✘ ${TARGET_BRANCH} is currently blocked" >>"${GITHUB_OUTPUT}"
     exit 1
 fi
 
-echo "response=✔ ${SOURCE_BRANCH} is allowed to merge into ${TARGET_BRANCH}" >> $GITHUB_OUTPUT
+echo "response=✔ ${SOURCE_BRANCH} is allowed to merge into ${TARGET_BRANCH}" >>"${GITHUB_OUTPUT}"
