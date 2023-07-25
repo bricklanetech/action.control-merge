@@ -100,6 +100,14 @@ FEATURE_PATTERN="${INPUT_FEATURE_PATTERN}"
 POSITION_SOURCE=$(indexOf "${SOURCE_BRANCH}" "${WORKFLOW[@]}")
 POSITION_TARGET=$(indexOf "${TARGET_BRANCH}" "${WORKFLOW[@]}")
 
+echo "POSITION_SOURCE=$POSITION_SOURCE"
+echo "POSITION_SOURCE=$POSITION_TARGET"
+echo "SOURCE_BRANCH=$SOURCE_BRANCH"
+echo "TARGET_BRANCH=$TARGET_BRANCH"
+echo "WORKFLOW=$WORKFLOW"
+echo "HOTFIX_PATTERN=$HOTFIX_PATTERN"
+echo "FEATURE_PATTERN=$FEATURE_PATTERN"
+
 # mark repo directory as safe to prevent 'dubious ownership' detected in the repository
 git config --global --add safe.directory /github/workspace
 
