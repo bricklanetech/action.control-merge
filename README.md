@@ -8,7 +8,7 @@ A Github action to check whether a merge/PR is permitted to happen between branc
 2. Within `jobs.<job_id>.steps` of the action workflow, add a `uses` statement similar to the following (see below for use of the `with` statement).
 
 ```yml
-- uses: propertylift/action.control-merge@v2
+- uses: bricklanetech/action.control-merge@v2
   with:
     workflow: a b c # default: main
     feature_pattern: feature/* # default: feature/*
