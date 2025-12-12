@@ -116,8 +116,24 @@ cd /github/workspace || exit 1
 
 # Fetch all remote branches with full history needed for merge-base comparison
 # GitHub Actions provides a shallow clone, so we need to unshallow and fetch all refs
-git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || \
-    git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || true
+echo "-> fetching remote branches"
+if ! git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*' 2>&1; then
+    echo "--> unshallow failed (may already be complete), trying regular fetch..."
+    if ! git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>&1; then
+        echo "response=✘ Failed to fetch remote branches from origin" >>"${GITHUB_OUTPUT}"
+        exit 1
+    fi
+fi
+
+# Verify required remote refs exist before proceeding
+echo "-> verifying required remote refs"
+for branch in "${WORKFLOW[@]}"; do
+    if ! git rev-parse --verify "origin/${branch}" >/dev/null 2>&1; then
+        echo "response=✘ Required workflow branch 'origin/${branch}' does not exist" >>"${GITHUB_OUTPUT}"
+        exit 1
+    fi
+    echo "--> origin/${branch} exists"
+done
 
 # hotfixes can be merged anywhere
 echo "-> checking if hotfix"
