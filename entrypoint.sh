@@ -111,6 +111,14 @@ echo "FEATURE_PATTERN=$FEATURE_PATTERN"
 # mark repo directory as safe to prevent 'dubious ownership' detected in the repository
 git config --global --add safe.directory /github/workspace
 
+# change to workspace directory
+cd /github/workspace || exit 1
+
+# Fetch all remote branches with full history needed for merge-base comparison
+# GitHub Actions provides a shallow clone, so we need to unshallow and fetch all refs
+git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || \
+    git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || true
+
 # hotfixes can be merged anywhere
 echo "-> checking if hotfix"
 if isHotfix; then
