@@ -127,6 +127,9 @@ if [ -z "${WORKFLOW_OVERRIDE}" ]; then
     echo -e "${YELLOW}🔎 Auto-detecting workflow from .github/workflows/*.yml${NC}"
 
     # Look for 'workflow:' in workflow files and extract the value
+    # NOTE: This assumes single-line YAML syntax (e.g., "workflow: testing production")
+    #       Multiline YAML arrays (workflow:\n  - testing\n  - production) are NOT supported
+    #       and will fall back to FALLBACK_WORKFLOW
     DETECTED_WORKFLOW=""
     if [ -d ".github/workflows" ]; then
         # Search for workflow: configuration in yml files
@@ -150,7 +153,8 @@ else
 fi
 
 # Apply target branch default (first branch in workflow)
-WORKFLOW_ARRAY=(${WORKFLOW})
+# Using read -ra to safely split into array (avoids SC2206 shellcheck warning)
+read -ra WORKFLOW_ARRAY <<< "${WORKFLOW}"
 if [ -z "${TARGET_BRANCH}" ]; then
     TARGET_BRANCH="${WORKFLOW_ARRAY[0]}"
     echo -e "${BLUE}   ℹ️  Target branch defaulting to first workflow branch: ${TARGET_BRANCH}${NC}"
@@ -252,8 +256,9 @@ echo -e "${YELLOW}🚀 Running entrypoint.sh${NC}"
 echo "────────────────────────────────────────"
 
 # Create a modified version of the script for local testing
+# Using @ as sed delimiter to avoid issues if TEST_DIR contains special characters
 TEMP_SCRIPT=$(mktemp)
-sed "s|/github/workspace|${TEST_DIR}|g" "${ENTRYPOINT_SCRIPT}" > "${TEMP_SCRIPT}"
+sed "s@/github/workspace@${TEST_DIR}@g" "${ENTRYPOINT_SCRIPT}" > "${TEMP_SCRIPT}"
 chmod +x "${TEMP_SCRIPT}"
 
 # Run the script and capture exit code
