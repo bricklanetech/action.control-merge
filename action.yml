@@ -16,6 +16,10 @@ inputs:
     description: the grep pattern to use for the format of feature branches (development branches that are yet to be added to workflow)
     required: false
     default: feature/*
+  chore_pattern:
+    description: the grep pattern to use for the format of chore branches (maintenance branches, treated the same as feature branches)
+    required: false
+    default: chore/*
 outputs:
   response:
     description: message provided for either success or failure, depending on reason for failure

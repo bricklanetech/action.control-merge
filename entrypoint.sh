@@ -29,10 +29,12 @@ isHotfix() {
     return $(echo "${SOURCE_BRANCH}" | grep -qe "${HOTFIX_PATTERN}")
 }
 
-# checks if source branch is a feature and returns success (or failure if not)
+# checks if source branch is a feature (or chore) and returns success (or failure if not)
+# chore branches are treated identically to feature branches
 isFeature() {
     TARGET=${1:-$SOURCE_BRANCH}
-    return $(echo "${TARGET}" | grep -qe "${FEATURE_PATTERN}")
+    echo "${TARGET}" | grep -qe "${FEATURE_PATTERN}" && return 0
+    echo "${TARGET}" | grep -qe "${CHORE_PATTERN}"
 }
 
 # checks if merge is permitted via the defined workflow array
@@ -96,6 +98,7 @@ TARGET_BRANCH="${GITHUB_BASE_REF}"
 WORKFLOW=(${INPUT_WORKFLOW})
 HOTFIX_PATTERN="${INPUT_HOTFIX_PATTERN}"
 FEATURE_PATTERN="${INPUT_FEATURE_PATTERN}"
+CHORE_PATTERN="${INPUT_CHORE_PATTERN}"
 
 POSITION_SOURCE=$(indexOf "${SOURCE_BRANCH}" "${WORKFLOW[@]}")
 POSITION_TARGET=$(indexOf "${TARGET_BRANCH}" "${WORKFLOW[@]}")
@@ -107,6 +110,7 @@ echo "TARGET_BRANCH=$TARGET_BRANCH"
 echo "WORKFLOW=$WORKFLOW"
 echo "HOTFIX_PATTERN=$HOTFIX_PATTERN"
 echo "FEATURE_PATTERN=$FEATURE_PATTERN"
+echo "CHORE_PATTERN=$CHORE_PATTERN"
 
 # mark repo directory as safe to prevent 'dubious ownership' detected in the repository
 git config --global --add safe.directory /github/workspace
