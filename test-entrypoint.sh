@@ -241,7 +241,7 @@ export GITHUB_HEAD_REF="${SOURCE_BRANCH}"
 export GITHUB_BASE_REF="${TARGET_BRANCH}"
 export INPUT_WORKFLOW="${WORKFLOW}"
 export INPUT_HOTFIX_PATTERN="hotfix/*"
-export INPUT_FEATURE_PATTERN="feature/*"
+export INPUT_FEATURE_PATTERN="\(feature\|chore\)/"
 export GITHUB_OUTPUT="/dev/stdout"
 
 echo "  GITHUB_HEAD_REF=${GITHUB_HEAD_REF}"
