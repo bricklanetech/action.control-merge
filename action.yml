@@ -13,9 +13,9 @@ inputs:
     required: false
     default: hotfix/*
   feature_pattern:
-    description: the grep pattern to use for the format of feature branches (development branches that are yet to be added to workflow); by default matches feature/ and chore/
+    description: the grep pattern to use for the format of feature branches (development branches that are yet to be added to workflow); by default matches branches starting with feature/ or chore/
     required: false
-    default: \(feature\|chore\)/
+    default: ^\(feature\|chore\)/
 outputs:
   response:
     description: message provided for either success or failure, depending on reason for failure

@@ -241,7 +241,7 @@ export GITHUB_HEAD_REF="${SOURCE_BRANCH}"
 export GITHUB_BASE_REF="${TARGET_BRANCH}"
 export INPUT_WORKFLOW="${WORKFLOW}"
 export INPUT_HOTFIX_PATTERN="hotfix/*"
-export INPUT_FEATURE_PATTERN="\(feature\|chore\)/"
+export INPUT_FEATURE_PATTERN="^\(feature\|chore\)/"
 export GITHUB_OUTPUT="/dev/stdout"
 
 echo "  GITHUB_HEAD_REF=${GITHUB_HEAD_REF}"
@@ -249,6 +249,39 @@ echo "  GITHUB_BASE_REF=${GITHUB_BASE_REF}"
 echo "  INPUT_WORKFLOW=${INPUT_WORKFLOW}"
 echo "  INPUT_HOTFIX_PATTERN=${INPUT_HOTFIX_PATTERN}"
 echo "  INPUT_FEATURE_PATTERN=${INPUT_FEATURE_PATTERN}"
+echo ""
+
+# Self-test: verify feature_pattern only classifies branches whose name STARTS
+# with feature/ or chore/, and not branches with those prefixes embedded
+# elsewhere. Mirrors how isFeature() applies the pattern in entrypoint.sh.
+echo -e "${YELLOW}🧪 Verifying feature_pattern classification${NC}"
+PATTERN_TEST_FAILED=0
+assert_feature_match() {
+    # $1 = branch name, $2 = expected classification ("yes" or "no")
+    local branch="$1" expected="$2" actual
+    if echo "${branch}" | grep -qe "${INPUT_FEATURE_PATTERN}"; then
+        actual="yes"
+    else
+        actual="no"
+    fi
+    if [ "${actual}" = "${expected}" ]; then
+        echo -e "${GREEN}   ✅ ${branch} -> feature=${actual}${NC}"
+    else
+        echo -e "${RED}   ❌ ${branch} -> feature=${actual} (expected ${expected})${NC}"
+        PATTERN_TEST_FAILED=1
+    fi
+}
+
+assert_feature_match "feature/my-feature" "yes"
+assert_feature_match "chore/my-chore" "yes"
+assert_feature_match "x-feature/embedded" "no"
+assert_feature_match "notachore/embedded" "no"
+assert_feature_match "hotfix/chore/embedded" "no"
+
+if [ "${PATTERN_TEST_FAILED}" -ne 0 ]; then
+    echo -e "${RED}❌ feature_pattern classification self-test failed${NC}"
+    exit 1
+fi
 echo ""
 
 # Run the entrypoint script (replacing /github/workspace with test directory)

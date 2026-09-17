@@ -11,7 +11,7 @@ A Github action to check whether a merge/PR is permitted to happen between branc
 - uses: bricklanetech/action.control-merge@v2
   with:
     workflow: a b c # default: main
-    feature_pattern: \(feature\|chore\)/ # default: \(feature\|chore\)/
+    feature_pattern: ^\(feature\|chore\)/ # default: ^\(feature\|chore\)/
     hotfix_pattern: hotfix/* # default: hotfix/*
 ```
 
