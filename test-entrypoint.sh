@@ -256,6 +256,7 @@ echo ""
 # elsewhere. Mirrors how isFeature() applies the pattern in entrypoint.sh.
 echo -e "${YELLOW}🧪 Verifying feature_pattern classification${NC}"
 PATTERN_TEST_FAILED=0
+# Assert that a branch has the expected feature-pattern classification.
 assert_feature_match() {
     # $1 = branch name, $2 = expected classification ("yes" or "no")
     local branch="$1" expected="$2" actual
