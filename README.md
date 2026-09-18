@@ -11,13 +11,13 @@ A Github action to check whether a merge/PR is permitted to happen between branc
 - uses: bricklanetech/action.control-merge@v2
   with:
     workflow: a b c # default: main
-    feature_pattern: feature/* # default: feature/*
+    feature_pattern: ^\(feature\|chore\)/ # default: ^\(feature\|chore\)/
     hotfix_pattern: hotfix/* # default: hotfix/*
 ```
 
 ## Using the `with` statement
 
-The with statement is used for this action to provide a pattern to be used for feature and hotfix branches (the concepts of both branch types are based on the GitFlow workflow), along with a list of branches to be used as a control workflow to allow merges from one branch to another (for multi-stage release processes etc).
+The with statement is used for this action to provide a pattern to be used for feature and hotfix branches (the concepts of both branch types are based on the GitFlow workflow), along with a list of branches to be used as a control workflow to allow merges from one branch to another (for multi-stage release processes etc). By default the `feature_pattern` also matches `chore/` branches, so chore branches are treated identically to feature branches.
 
 Wildcards as allowed by `grep` are permitted in the source branch values, such as `hotfix/*`.
 
@@ -25,7 +25,7 @@ Wildcards as allowed by `grep` are permitted in the source branch values, such a
 
 The general rules for merging between different branches is that:
 
-- a `feature` may **ONLY** merge into other features or `workflow[0]`
+- a `feature` (or `chore`) may **ONLY** merge into other features/chores or `workflow[0]`
 - `workflow[n]` may **ONLY** merge into `workflow[n+1]`
 - a `hotfix` may merge into **ANY** branch
 
